@@ -1,11 +1,11 @@
-import Header from '@/components/landing/Header';
-import Hero from '@/components/landing/Hero';
-import MostPicked from '@/components/landing/MostPicked';
-import Services from '@/components/landing/Services';
-import Testimonials from '@/components/landing/Testimonials';
-import ContactSection from '@/components/landing/ContactSection';
-import Subscribe from '@/components/landing/Subscribe';
-import SiteFooter from '@/components/landing/SiteFooter';
+import Header from '@/components/layout/Header';
+import Hero from '@/components/body/Hero';
+import MostPicked from '@/components/body/MostPicked';
+import Services from '@/components/body/Services';
+import Testimonials from '@/components/body/Testimonials';
+import ContactSection from '@/components/body/ContactSection';
+import Subscribe from '@/components/body/Subscribe';
+import Footer from '@/components/layout/Footer';
 
 export default function LandingPageRoute() {
   return (
@@ -17,7 +17,7 @@ export default function LandingPageRoute() {
       <Testimonials />
       <ContactSection />
       <Subscribe />
-      <SiteFooter />
+      <Footer />
     </div>
   );
 }
