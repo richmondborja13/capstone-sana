@@ -3,8 +3,7 @@ import Hero from '@/components/body/Hero';
 import MostPicked from '@/components/body/MostPicked';
 import Services from '@/components/body/Services';
 import Testimonials from '@/components/body/Testimonials';
-import ContactSection from '@/components/body/ContactSection';
-import Subscribe from '@/components/body/Subscribe';
+import ContactSection from '@/components/landing/ContactSection';
 import Footer from '@/components/layout/Footer';
 
 export default function LandingPageRoute() {
@@ -16,7 +15,6 @@ export default function LandingPageRoute() {
       <Services />
       <Testimonials />
       <ContactSection />
-      <Subscribe />
       <Footer />
     </div>
   );

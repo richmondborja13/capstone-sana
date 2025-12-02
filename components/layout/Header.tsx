@@ -1,16 +1,24 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 
 const Header: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<'about' | 'services' | null>(null);
   const [isTestimonialSection, setIsTestimonialSection] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const aboutRef = useRef<HTMLDivElement | null>(null);
   const servicesRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
       setOpenDropdown(null);
@@ -19,13 +27,28 @@ const Header: React.FC = () => {
     handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
+
     const updateActiveSection = () => {
       const scrollPosition = window.scrollY;
       const viewportHeight = window.innerHeight;
       const triggerPoint = viewportHeight * 0.3; // Trigger when section is 30% into viewport
+
+      // Check if footer is in view - if so, clear active state
+      const footer = document.querySelector('footer');
+      if (footer) {
+        const footerRect = footer.getBoundingClientRect();
+        const footerTop = footerRect.top;
+        // If footer is visible in viewport (top is above bottom of viewport)
+        if (footerTop < viewportHeight && footerTop > -footerRect.height) {
+          setActiveIndex(-1); // Set to -1 to indicate no active item
+          setIsTestimonialSection(false);
+          return;
+        }
+      }
 
       // Check if we're at the very top (hero section)
       if (scrollPosition < 50) {
@@ -115,7 +138,7 @@ const Header: React.FC = () => {
     updateActiveSection();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -137,7 +160,12 @@ const Header: React.FC = () => {
   const scrollToSection = (targetId: string) => {
     const el = document.getElementById(targetId);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (targetId === 'contact') {
+        // For contact section, center it in the viewport to show the whole section
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 
@@ -160,12 +188,12 @@ const Header: React.FC = () => {
             }}
             className={`group relative pb-1 transition-colors ${
               activeIndex === 0 ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
-            }`}
+            } ${activeIndex === -1 ? 'text-gray-700' : ''}`}
           >
             <span>Home</span>
             <span
               className={`absolute left-0 -bottom-0.5 h-0.5 bg-blue-600 transition-all duration-300 ease-out ${
-                activeIndex === 0 ? 'w-full' : 'w-0 group-hover:w-full'
+                activeIndex === 0 ? 'w-full' : activeIndex === -1 ? 'w-0' : 'w-0 group-hover:w-full'
               }`}
             />
           </button>
@@ -180,7 +208,7 @@ const Header: React.FC = () => {
               }}
               className={`flex items-center gap-1 pb-1 transition-colors ${
                 activeIndex === 1 ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
-              }`}
+              } ${activeIndex === -1 ? 'text-gray-700' : ''}`}
             >
               <span>{isTestimonialSection ? 'Testimonials' : 'About Us'}</span>
               <svg
@@ -194,9 +222,9 @@ const Header: React.FC = () => {
                 <path d="M6 9l6 6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            <span
+              <span
               className={`pointer-events-none absolute left-0 -bottom-0.5 h-0.5 bg-blue-600 transition-all duration-300 ease-out ${
-                activeIndex === 1 ? 'w-full' : 'w-0 group-hover:w-full'
+                activeIndex === 1 ? 'w-full' : activeIndex === -1 ? 'w-0' : 'w-0 group-hover:w-full'
               }`}
             />
 
@@ -276,9 +304,11 @@ const Header: React.FC = () => {
               className={`flex items-center gap-1 pb-1 transition-colors ${
                 activeIndex === 2
                   ? 'text-blue-600'
-                  : isScrolled
-                    ? 'text-gray-700 hover:text-blue-600'
-                    : 'text-white hover:text-blue-200'
+                  : activeIndex === -1
+                    ? 'text-gray-700'
+                    : isScrolled
+                      ? 'text-gray-700 hover:text-blue-600'
+                      : 'text-white hover:text-blue-200'
               }`}
             >
               <span>Services</span>
@@ -295,7 +325,7 @@ const Header: React.FC = () => {
             </button>
             <span
               className={`pointer-events-none absolute left-0 -bottom-0.5 h-0.5 bg-blue-600 transition-all duration-300 ease-out ${
-                activeIndex === 2 ? 'w-full' : 'w-0 group-hover:w-full'
+                activeIndex === 2 ? 'w-full' : activeIndex === -1 ? 'w-0' : 'w-0 group-hover:w-full'
               }`}
             />
 
@@ -330,29 +360,32 @@ const Header: React.FC = () => {
             className={`group relative pb-1 transition-colors ${
               activeIndex === 3
                 ? 'text-blue-600'
-                : isScrolled
-                  ? 'text-gray-700 hover:text-blue-600'
-                  : 'text-white hover:text-blue-200'
+                : activeIndex === -1
+                  ? 'text-gray-700'
+                  : isScrolled
+                    ? 'text-gray-700 hover:text-blue-600'
+                    : 'text-white hover:text-blue-200'
             }`}
           >
             <span>Contact</span>
             <span
               className={`absolute left-0 -bottom-0.5 h-0.5 bg-blue-600 transition-all duration-300 ease-out ${
-                activeIndex === 3 ? 'w-full' : 'w-0 group-hover:w-full'
+                activeIndex === 3 ? 'w-full' : activeIndex === -1 ? 'w-0' : 'w-0 group-hover:w-full'
               }`}
             />
           </button>
         </nav>
 
-        <button
-          className={`px-6 py-2 rounded-lg border transition-colors ${
+        <Link
+          href="/login-register"
+          className={`px-6 py-2 rounded-lg border transition-colors inline-block text-center ${
             isScrolled
               ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
               : 'bg-white text-blue-600 border-transparent hover:bg-blue-50'
           }`}
         >
           Sign up
-        </button>
+        </Link>
       </div>
     </header>
   );
